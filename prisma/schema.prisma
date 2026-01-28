@@ -1,0 +1,414 @@
+generator client {
+  provider = "prisma-client-js"
+  moduleFormat  = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model check_ins {
+  id                              String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  registration_id                 String        @db.Uuid
+  checkpoint_id                   String        @db.Uuid
+  checked_in_at                   DateTime?     @default(now()) @db.Timestamp(6)
+  latitude                        Decimal?      @db.Decimal(10, 8)
+  longitude                       Decimal?      @db.Decimal(11, 8)
+  gps_accuracy_meters             Decimal?      @db.Decimal(10, 2)
+  distance_from_checkpoint_meters Decimal?      @db.Decimal(10, 2)
+  photo_url                       String?
+  photo_verified                  Boolean?      @default(false)
+  manually_verified               Boolean?      @default(false)
+  verified_by                     String?       @db.Uuid
+  points_earned                   Int?          @default(0)
+  time_bonus_earned               Int?          @default(0)
+  is_valid                        Boolean?      @default(true)
+  invalid_reason                  String?
+  created_at                      DateTime?     @default(now()) @db.Timestamp(6)
+  updated_at                      DateTime?     @default(now()) @db.Timestamp(6)
+  checkpoints                     checkpoints   @relation(fields: [checkpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  registrations                   registrations @relation(fields: [registration_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                           users?        @relation(fields: [verified_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([registration_id, checkpoint_id])
+  @@index([checked_in_at], map: "idx_checkins_checked_in_at")
+  @@index([checkpoint_id], map: "idx_checkins_checkpoint_id")
+  @@index([registration_id], map: "idx_checkins_registration_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model checkpoints {
+  id                   String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  game_id              String        @db.Uuid
+  trail_id             String?       @db.Uuid
+  checkpoint_number    Int
+  name                 String?       @db.VarChar(255)
+  description          String?
+  custom_location_name String?       @db.VarChar(255)
+  latitude             Decimal?      @db.Decimal(10, 8)
+  longitude            Decimal?      @db.Decimal(11, 8)
+  address              String?
+  floor_level          String?       @db.VarChar(50)
+  checkpoint_type      String        @db.VarChar(50)
+  content              Json?
+  points               Int?          @default(0)
+  time_bonus_seconds   Int?
+  requires_photo       Boolean?      @default(false)
+  requires_gps         Boolean?      @default(true)
+  gps_radius_meters    Int?          @default(50)
+  is_optional          Boolean?      @default(false)
+  next_checkpoint_id   String?       @db.Uuid
+  is_active            Boolean?      @default(true)
+  created_at           DateTime?     @default(now()) @db.Timestamp(6)
+  updated_at           DateTime?     @default(now()) @db.Timestamp(6)
+  check_ins            check_ins[]
+  games                games         @relation(fields: [game_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  checkpoints          checkpoints?  @relation("checkpointsTocheckpoints", fields: [next_checkpoint_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_checkpoints    checkpoints[] @relation("checkpointsTocheckpoints")
+  trails               trails?       @relation(fields: [trail_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([game_id, checkpoint_number])
+  @@index([checkpoint_number], map: "idx_checkpoints_checkpoint_number")
+  @@index([game_id], map: "idx_checkpoints_game_id")
+  @@index([trail_id], map: "idx_checkpoints_trail_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model games {
+  id                                String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  creator_id                        String          @db.Uuid
+  location_id                       String?         @db.Uuid
+  title                             String          @db.VarChar(255)
+  description                       String?
+  game_type                         String          @db.VarChar(50)
+  template_id                       String?         @db.VarChar(50)
+  game_environment                  String?         @default("outdoor") @db.VarChar(20)
+  scheduled_date                    DateTime        @db.Date
+  scheduled_time                    DateTime        @db.Time(6)
+  duration_minutes                  Int
+  registration_deadline             DateTime?       @db.Timestamp(6)
+  max_participants                  Int
+  min_participants                  Int?            @default(1)
+  current_participants              Int?            @default(0)
+  is_team_based                     Boolean?        @default(false)
+  team_size                         Int?
+  max_teams                         Int?
+  entry_fee                         Decimal?        @default(0.00) @db.Decimal(10, 2)
+  currency                          String?         @default("KES") @db.VarChar(3)
+  is_free                           Boolean?        @default(true)
+  game_config                       Json?
+  rules                             String?
+  status                            String?         @default("draft") @db.VarChar(20)
+  is_featured                       Boolean?        @default(false)
+  is_private                        Boolean?        @default(false)
+  cancellation_policy               String?
+  can_cancel_until                  DateTime?       @db.Timestamp(6)
+  winner_team_id                    String?         @db.Uuid
+  winner_user_id                    String?         @db.Uuid
+  total_views                       Int?            @default(0)
+  total_registrations               Int?            @default(0)
+  completion_rate                   Decimal?        @db.Decimal(5, 2)
+  average_rating                    Decimal?        @default(0.00) @db.Decimal(3, 2)
+  total_ratings                     Int?            @default(0)
+  created_at                        DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at                        DateTime?       @default(now()) @db.Timestamp(6)
+  started_at                        DateTime?       @db.Timestamp(6)
+  completed_at                      DateTime?       @db.Timestamp(6)
+  cancelled_at                      DateTime?       @db.Timestamp(6)
+  deleted_at                        DateTime?       @db.Timestamp(6)
+  checkpoints                       checkpoints[]
+  users_games_creator_idTousers     users           @relation("games_creator_idTousers", fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  locations                         locations?      @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_games_winner_user_idTousers users?          @relation("games_winner_user_idTousers", fields: [winner_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  registrations                     registrations[]
+  reviews                           reviews[]
+  teams                             teams[]
+
+  @@index([created_at], map: "idx_games_created_at")
+  @@index([creator_id], map: "idx_games_creator_id")
+  @@index([game_type], map: "idx_games_game_type")
+  @@index([is_featured], map: "idx_games_is_featured")
+  @@index([location_id], map: "idx_games_location_id")
+  @@index([scheduled_date], map: "idx_games_scheduled_date")
+  @@index([status], map: "idx_games_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model locations {
+  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name             String    @db.VarChar(255)
+  description      String?
+  address          String?
+  city             String?   @db.VarChar(100)
+  country          String?   @default("Kenya") @db.VarChar(100)
+  latitude         Decimal   @db.Decimal(10, 8)
+  longitude        Decimal   @db.Decimal(11, 8)
+  difficulty_level String?   @db.VarChar(20)
+  total_area_km    Decimal?  @db.Decimal(10, 2)
+  elevation_min    Int?
+  elevation_max    Int?
+  cover_image_url  String?
+  images_urls      String[]
+  has_parking      Boolean?  @default(false)
+  has_restrooms    Boolean?  @default(false)
+  has_water        Boolean?  @default(false)
+  entry_fee        Decimal?  @default(0.00) @db.Decimal(10, 2)
+  opening_time     DateTime? @db.Time(6)
+  closing_time     DateTime? @db.Time(6)
+  is_open_24_7     Boolean?  @default(false)
+  is_active        Boolean?  @default(true)
+  is_verified      Boolean?  @default(false)
+  created_by       String?   @db.Uuid
+  created_at       DateTime? @default(now()) @db.Timestamp(6)
+  updated_at       DateTime? @default(now()) @db.Timestamp(6)
+  deleted_at       DateTime? @db.Timestamp(6)
+  games            games[]
+  users            users?    @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  trails           trails[]
+
+  @@index([city], map: "idx_locations_city")
+  @@index([latitude, longitude], map: "idx_locations_coordinates")
+  @@index([created_by], map: "idx_locations_created_by")
+  @@index([is_active], map: "idx_locations_is_active")
+}
+
+model notifications {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id             String    @db.Uuid
+  type                String    @db.VarChar(50)
+  title               String    @db.VarChar(255)
+  message             String
+  related_entity_type String?   @db.VarChar(50)
+  related_entity_id   String?   @db.Uuid
+  is_read             Boolean?  @default(false)
+  read_at             DateTime? @db.Timestamp(6)
+  created_at          DateTime? @default(now()) @db.Timestamp(6)
+  users               users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_at], map: "idx_notifications_created_at")
+  @@index([is_read], map: "idx_notifications_is_read")
+  @@index([user_id], map: "idx_notifications_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model payments {
+  id                                                    String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id                                               String          @db.Uuid
+  registration_id                                       String?         @db.Uuid
+  amount                                                Decimal         @db.Decimal(10, 2)
+  currency                                              String?         @default("KES") @db.VarChar(3)
+  payment_method                                        String          @db.VarChar(50)
+  transaction_id                                        String?         @unique @db.VarChar(255)
+  transaction_reference                                 String?         @db.VarChar(255)
+  mpesa_receipt_number                                  String?         @db.VarChar(255)
+  phone_number                                          String?         @db.VarChar(20)
+  status                                                String?         @default("pending") @db.VarChar(20)
+  platform_commission                                   Decimal?        @db.Decimal(10, 2)
+  creator_payout                                        Decimal?        @db.Decimal(10, 2)
+  transaction_fee                                       Decimal?        @db.Decimal(10, 2)
+  refunded_amount                                       Decimal?        @default(0.00) @db.Decimal(10, 2)
+  refund_reason                                         String?
+  refunded_at                                           DateTime?       @db.Timestamp(6)
+  metadata                                              Json?
+  created_at                                            DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at                                            DateTime?       @default(now()) @db.Timestamp(6)
+  completed_at                                          DateTime?       @db.Timestamp(6)
+  registrations_payments_registration_idToregistrations registrations?  @relation("payments_registration_idToregistrations", fields: [registration_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                                                 users           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  registrations_registrations_payment_idTopayments      registrations[] @relation("registrations_payment_idTopayments")
+
+  @@index([created_at], map: "idx_payments_created_at")
+  @@index([registration_id], map: "idx_payments_registration_id")
+  @@index([status], map: "idx_payments_status")
+  @@index([transaction_id], map: "idx_payments_transaction_id")
+  @@index([user_id], map: "idx_payments_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model payouts {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  creator_id          String    @db.Uuid
+  amount              Decimal   @db.Decimal(10, 2)
+  currency            String?   @default("KES") @db.VarChar(3)
+  payout_method       String    @db.VarChar(50)
+  mpesa_phone         String?   @db.VarChar(20)
+  bank_account_number String?   @db.VarChar(50)
+  bank_name           String?   @db.VarChar(100)
+  status              String?   @default("pending") @db.VarChar(20)
+  transaction_id      String?   @db.VarChar(255)
+  processed_at        DateTime? @db.Timestamp(6)
+  notes               String?
+  created_at          DateTime? @default(now()) @db.Timestamp(6)
+  updated_at          DateTime? @default(now()) @db.Timestamp(6)
+  users               users     @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([created_at], map: "idx_payouts_created_at")
+  @@index([creator_id], map: "idx_payouts_creator_id")
+  @@index([status], map: "idx_payouts_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model registrations {
+  id                                               String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  game_id                                          String      @db.Uuid
+  user_id                                          String      @db.Uuid
+  team_id                                          String?     @db.Uuid
+  registration_status                              String?     @default("pending") @db.VarChar(20)
+  payment_id                                       String?     @db.Uuid
+  checked_in                                       Boolean?    @default(false)
+  checked_in_at                                    DateTime?   @db.Timestamp(6)
+  completed                                        Boolean?    @default(false)
+  completion_time_seconds                          Int?
+  final_score                                      Int?        @default(0)
+  final_rank                                       Int?
+  cancelled_at                                     DateTime?   @db.Timestamp(6)
+  cancellation_reason                              String?
+  refund_status                                    String?     @db.VarChar(20)
+  created_at                                       DateTime?   @default(now()) @db.Timestamp(6)
+  updated_at                                       DateTime?   @default(now()) @db.Timestamp(6)
+  check_ins                                        check_ins[]
+  payments_payments_registration_idToregistrations payments[]  @relation("payments_registration_idToregistrations")
+  payments_registrations_payment_idTopayments      payments?   @relation("registrations_payment_idTopayments", fields: [payment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_registration_payment")
+  games                                            games       @relation(fields: [game_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  teams                                            teams?      @relation(fields: [team_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                                            users       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([game_id, user_id])
+  @@index([created_at], map: "idx_registrations_created_at")
+  @@index([game_id], map: "idx_registrations_game_id")
+  @@index([registration_status], map: "idx_registrations_status")
+  @@index([team_id], map: "idx_registrations_team_id")
+  @@index([user_id], map: "idx_registrations_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reviews {
+  id                              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  game_id                         String    @db.Uuid
+  user_id                         String    @db.Uuid
+  creator_id                      String    @db.Uuid
+  rating                          Int
+  title                           String?   @db.VarChar(255)
+  comment                         String?
+  photo_urls                      String[]
+  helpful_count                   Int?      @default(0)
+  creator_response                String?
+  creator_responded_at            DateTime? @db.Timestamp(6)
+  is_published                    Boolean?  @default(true)
+  is_flagged                      Boolean?  @default(false)
+  flagged_reason                  String?
+  created_at                      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at                      DateTime? @default(now()) @db.Timestamp(6)
+  deleted_at                      DateTime? @db.Timestamp(6)
+  users_reviews_creator_idTousers users     @relation("reviews_creator_idTousers", fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  games                           games     @relation(fields: [game_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_reviews_user_idTousers    users     @relation("reviews_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([game_id, user_id])
+  @@index([created_at], map: "idx_reviews_created_at")
+  @@index([creator_id], map: "idx_reviews_creator_id")
+  @@index([game_id], map: "idx_reviews_game_id")
+  @@index([rating], map: "idx_reviews_rating")
+  @@index([user_id], map: "idx_reviews_user_id")
+}
+
+model teams {
+  id                      String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  game_id                 String          @db.Uuid
+  team_name               String          @db.VarChar(255)
+  team_avatar_url         String?
+  team_color              String?         @db.VarChar(7)
+  captain_id              String?         @db.Uuid
+  max_size                Int
+  current_size            Int?            @default(0)
+  total_points            Int?            @default(0)
+  completion_time_seconds Int?
+  rank                    Int?
+  is_full                 Boolean?        @default(false)
+  created_at              DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at              DateTime?       @default(now()) @db.Timestamp(6)
+  registrations           registrations[]
+  users                   users?          @relation(fields: [captain_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  games                   games           @relation(fields: [game_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([game_id, team_name])
+  @@index([captain_id], map: "idx_teams_captain_id")
+  @@index([game_id], map: "idx_teams_game_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model trails {
+  id                     String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  location_id            String        @db.Uuid
+  trail_number           Int
+  name                   String?       @db.VarChar(255)
+  description            String?
+  latitude               Decimal       @db.Decimal(10, 8)
+  longitude              Decimal       @db.Decimal(11, 8)
+  elevation              Int?
+  difficulty_rating      Int?          @default(1)
+  distance_from_start    Decimal?      @db.Decimal(10, 2)
+  estimated_time_minutes Int?
+  image_url              String?
+  is_active              Boolean?      @default(true)
+  created_at             DateTime?     @default(now()) @db.Timestamp(6)
+  updated_at             DateTime?     @default(now()) @db.Timestamp(6)
+  deleted_at             DateTime?     @db.Timestamp(6)
+  checkpoints            checkpoints[]
+  locations              locations     @relation(fields: [location_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([location_id, trail_number])
+  @@index([latitude, longitude], map: "idx_trails_coordinates")
+  @@index([location_id], map: "idx_trails_location_id")
+  @@index([trail_number], map: "idx_trails_trail_number")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model users {
+  id                                String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email                             String          @unique @db.VarChar(255)
+  phone                             String?         @unique @db.VarChar(20)
+  password_hash                     String          @db.VarChar(255)
+  role                              String          @default("player") @db.VarChar(20)
+  first_name                        String          @db.VarChar(100)
+  last_name                         String          @db.VarChar(100)
+  avatar_url                        String?
+  bio                               String?
+  date_of_birth                     DateTime?       @db.Date
+  gender                            String?         @db.VarChar(20)
+  email_verified                    Boolean?        @default(false)
+  phone_verified                    Boolean?        @default(false)
+  verification_token                String?         @db.VarChar(255)
+  is_active                         Boolean?        @default(true)
+  is_banned                         Boolean?        @default(false)
+  ban_reason                        String?
+  creator_verified                  Boolean?        @default(false)
+  creator_rating                    Decimal?        @default(0.00) @db.Decimal(3, 2)
+  total_games_created               Int?            @default(0)
+  total_games_completed             Int?            @default(0)
+  total_games_played                Int?            @default(0)
+  total_wins                        Int?            @default(0)
+  achievement_count                 Int?            @default(0)
+  created_at                        DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at                        DateTime?       @default(now()) @db.Timestamp(6)
+  last_login_at                     DateTime?       @db.Timestamp(6)
+  deleted_at                        DateTime?       @db.Timestamp(6)
+  check_ins                         check_ins[]
+  games_games_creator_idTousers     games[]         @relation("games_creator_idTousers")
+  games_games_winner_user_idTousers games[]         @relation("games_winner_user_idTousers")
+  locations                         locations[]
+  notifications                     notifications[]
+  payments                          payments[]
+  payouts                           payouts[]
+  registrations                     registrations[]
+  reviews_reviews_creator_idTousers reviews[]       @relation("reviews_creator_idTousers")
+  reviews_reviews_user_idTousers    reviews[]       @relation("reviews_user_idTousers")
+  teams                             teams[]
+
+  @@index([created_at], map: "idx_users_created_at")
+  @@index([deleted_at], map: "idx_users_deleted_at")
+  @@index([email], map: "idx_users_email")
+  @@index([phone], map: "idx_users_phone")
+  @@index([role], map: "idx_users_role")
+}
