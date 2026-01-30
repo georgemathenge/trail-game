@@ -43,13 +43,18 @@ export class UserService {
       );
     }
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async updateProfile(id: string, body: any) {
+    try {
+      await this.prisma.users.update({
+        where: { id },
+        data: body,
+      });
+      return { status: 200, message: 'Profile updated successfully' };
+    } catch (error: any) {
+      throw new InternalServerErrorException(
+        'Failed to update user profile: ' + error,
+      );
+    }
   }
 
   remove(id: number) {

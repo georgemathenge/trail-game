@@ -7,6 +7,19 @@ datasource db {
   provider = "postgresql"
 }
 
+// Add this block
+model prisma_migrations {
+  id              String    @id @default(cuid())
+  checksum        String
+  finished_at     DateTime?
+  execution_time  Int
+  migration_name  String    @unique
+  logs            String?
+  rolled_back_at  DateTime?
+  started_at      DateTime  @default(now())
+  applied_steps_count Int   @default(0)
+}
+
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model check_ins {
   id                              String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
@@ -405,6 +418,8 @@ model users {
   reviews_reviews_creator_idTousers reviews[]       @relation("reviews_creator_idTousers")
   reviews_reviews_user_idTousers    reviews[]       @relation("reviews_user_idTousers")
   teams                             teams[]
+  preferences       Json?     @default("{}")  
+
 
   @@index([created_at], map: "idx_users_created_at")
   @@index([deleted_at], map: "idx_users_deleted_at")

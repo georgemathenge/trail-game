@@ -17,6 +17,8 @@ import { UserService } from './user.service.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from '../shared/upload/upload.service.js';
+import { RolesGuard } from '../auth/guards/roles.guard.js';
+import { Roles } from '../auth/decorators/role.decorator.js';
 
 @Controller('user')
 export class UserController {
@@ -31,9 +33,11 @@ export class UserController {
     return this.userService.fetchUserProfile(req.user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  @Patch('profile')
+  @Roles('admin', 'creator', 'player  ')
+  @UseGuards(JwtAuthGuard)
+  updateProfile(@Body() body: any, @Request() req: any) {
+    return this.userService.updateProfile(req.user.id, body);
   }
 
   @Patch('avatar')
