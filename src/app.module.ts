@@ -16,6 +16,9 @@ import { ResendModule } from 'nest-resend';
 import { MailService } from './services/mail/mail.service.js';
 import { VerificationModule } from './verification/verification.module.js';
 import { VerificationController } from './verification/verification.controller.js';
+import { UserModule } from './user/user.module.js';
+import { UploadModule } from './shared/upload/upload.module.js';
+import { CloudinaryService } from './services/cloudinary/cloudinary.service.js';
 @Module({
   imports: [
     ThrottlerModule.forRoot({
@@ -36,6 +39,8 @@ import { VerificationController } from './verification/verification.controller.j
       apiKey: process.env.RESEND_API_KEY || 'your-resend-api-key-here',
     }),
     VerificationModule,
+    UserModule,
+    UploadModule,
   ],
   controllers: [AppController, AuthController, VerificationController],
   providers: [

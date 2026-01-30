@@ -162,7 +162,7 @@ export class AuthService {
     };
 
     return this.jwtService.sign(payload, {
-      secret: process.env.JWT_VERIFICATION_SECRET,
+      secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
     });
   }
 

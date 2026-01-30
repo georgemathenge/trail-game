@@ -27,7 +27,8 @@ export class VerificationController {
   async verifyEmail(@Query('token') token: string) {
     try {
       const payload = this.jwtService.verify(token, {
-        secret: process.env.JWT_VERIFICATION_SECRET,
+        secret:
+          process.env.JWT_SECRET || 'your-secret-key-change-in-production',
       });
 
       const user = await this.authService.findUserById(payload.sub);
