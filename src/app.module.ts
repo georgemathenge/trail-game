@@ -19,6 +19,9 @@ import { VerificationController } from './verification/verification.controller.j
 import { UserModule } from './user/user.module.js';
 import { UploadModule } from './shared/upload/upload.module.js';
 import { CloudinaryService } from './services/cloudinary/cloudinary.service.js';
+import { AdminModule } from './admin/admin.module.js';
+import { LocationModule } from './location/location.module.js';
+import { TrailModule } from './trail/trail.module.js';
 @Module({
   imports: [
     ThrottlerModule.forRoot({
@@ -41,6 +44,9 @@ import { CloudinaryService } from './services/cloudinary/cloudinary.service.js';
     VerificationModule,
     UserModule,
     UploadModule,
+    AdminModule,
+    LocationModule,
+    TrailModule,
   ],
   controllers: [AppController, AuthController, VerificationController],
   providers: [
