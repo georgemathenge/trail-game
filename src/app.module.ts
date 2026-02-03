@@ -22,6 +22,9 @@ import { CloudinaryService } from './services/cloudinary/cloudinary.service.js';
 import { AdminModule } from './admin/admin.module.js';
 import { LocationModule } from './location/location.module.js';
 import { TrailModule } from './trail/trail.module.js';
+import { MapsController } from './maps/maps.controller.js';
+import { MapsModule } from './maps/maps.module.js';
+import { MapsService } from './maps/maps.service.js';
 @Module({
   imports: [
     ThrottlerModule.forRoot({
@@ -47,8 +50,14 @@ import { TrailModule } from './trail/trail.module.js';
     AdminModule,
     LocationModule,
     TrailModule,
+    MapsModule,
   ],
-  controllers: [AppController, AuthController, VerificationController],
+  controllers: [
+    AppController,
+    AuthController,
+    VerificationController,
+    MapsController,
+  ],
   providers: [
     AppService,
     PrismaService,

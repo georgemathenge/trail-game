@@ -21,6 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.2",
+    "@mapbox/mapbox-sdk": "^0.16.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
@@ -59,8 +61,10 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/conventional-commits-parser": "^5.0.2",
     "@types/express": "^5.0.0",
+    "@types/geojson": "^7946.0.16",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.23",
+    "@types/mapbox__mapbox-sdk": "^0.16.3",
     "@types/minimist": "^1.2.5",
     "@types/multer": "^2.0.0",
     "@types/node": "^22.10.7",
