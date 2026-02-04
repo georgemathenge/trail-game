@@ -25,6 +25,8 @@ import { TrailModule } from './trail/trail.module.js';
 import { MapsController } from './maps/maps.controller.js';
 import { MapsModule } from './maps/maps.module.js';
 import { MapsService } from './maps/maps.service.js';
+import { GameTemplatesController } from './game-templates/game-templates.controller.js';
+import { GameTemplatesService } from './game-templates/game-templates.service.js';
 @Module({
   imports: [
     ThrottlerModule.forRoot({
@@ -57,6 +59,7 @@ import { MapsService } from './maps/maps.service.js';
     AuthController,
     VerificationController,
     MapsController,
+    GameTemplatesController,
   ],
   providers: [
     AppService,
@@ -68,6 +71,7 @@ import { MapsService } from './maps/maps.service.js';
     AuthService,
     JwtStrategy,
     MailService,
+    GameTemplatesService,
   ],
 })
 export class AppModule {}

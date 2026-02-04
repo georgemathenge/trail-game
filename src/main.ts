@@ -5,15 +5,22 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
-  app.useGlobalFilters(new AllExceptionsFilter());
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
+  // ✅ Move CORS here — BEFORE listen()
   app.enableCors({
-    origin: ['http://localhost:5173', 'https://trail-game.vercel.app'],
+    origin: [
+      'http://localhost:5173',
+      'https://trail-game.vercel.app',
+      'http://localhost:3000',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
+
+  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useLogger(['log', 'error', 'warn', 'debug', 'verbose']);
+
+  await app.listen(process.env.PORT ?? 3002); // ✅ After CORS
 }
 bootstrap();
