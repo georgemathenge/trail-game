@@ -49,3 +49,11 @@ export class ApiResponse<T> {
     this.timestamp = new Date().toISOString();
   }
 }
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

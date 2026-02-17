@@ -27,6 +27,7 @@ import { MapsModule } from './maps/maps.module.js';
 import { MapsService } from './maps/maps.service.js';
 import { GameTemplatesController } from './game-templates/game-templates.controller.js';
 import { GameTemplatesService } from './game-templates/game-templates.service.js';
+import { GameModule } from './game/game.module.js';
 @Module({
   imports: [
     ThrottlerModule.forRoot({
@@ -53,6 +54,7 @@ import { GameTemplatesService } from './game-templates/game-templates.service.js
     LocationModule,
     TrailModule,
     MapsModule,
+    GameModule,
   ],
   controllers: [
     AppController,

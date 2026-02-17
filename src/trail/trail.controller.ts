@@ -30,11 +30,6 @@ export class TrailController {
   }
 
   @Get()
-  findAll() {
-    return this.trailService.findAll();
-  }
-
-  @Get()
   async getTrailsByLocation(@Param('locationId') locationId: string) {
     return this.trailService.findByLocation(locationId);
   }

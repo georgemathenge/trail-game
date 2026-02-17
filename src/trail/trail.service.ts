@@ -79,10 +79,6 @@ export class TrailService {
     }
   }
 
-  findAll() {
-    return `This action returns all trail`;
-  }
-
   async findByLocation(id: string) {
     const trail = await this.prisma.trails.findMany({
       where: { location_id: id },
